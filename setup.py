@@ -10,7 +10,7 @@ setup(
     name="divein",
     version="1.0.1",
     author="Akhilesh S",
-    author_email="akhileshs2220@gmail.com",
+    author_email="akhileshs222000@gmail.com",
     description="A simple, secure, and modern SSH connection manager",
     long_description=long_description,
     long_description_content_type="text/markdown",
