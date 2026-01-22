@@ -7,8 +7,10 @@ from rich.text import Text
 from rich.console import Group
 from ..database import load_database, get_database_path
 
-def show_hosts():
-    """Show detailed information about all hosts"""
+import typer
+
+def show_hosts(identifier: str = typer.Argument(None, help="Host ID or Nickname")):
+    """Show detailed information about all hosts or a specific host"""
     database = load_database()
     
     print(f"[dim]Database: {get_database_path()}[/dim]")
@@ -18,8 +20,32 @@ def show_hosts():
         print("Use 'divein add' to add your first host.")
         return
     
-    # Sort by ID
-    for host_id in sorted(database.keys()):
+    target_ids = []
+    
+    if identifier:
+         # Find specific host
+         found = False
+         # Try ID
+         if identifier.isdigit() and int(identifier) in database:
+             target_ids.append(int(identifier))
+             found = True
+         else:
+             # Try nickname
+             for hid, data in database.items():
+                 if data.get("nickname") == identifier:
+                     target_ids.append(hid)
+                     found = True
+                     break
+         
+         if not found:
+             print(f"[bold red]Host '{identifier}' not found![/bold red]")
+             return
+    else:
+        # Show all
+        target_ids = sorted(database.keys())
+
+    # Display loop
+    for host_id in target_ids:
         data = database[host_id]
         
         nickname = data.get("nickname", "")

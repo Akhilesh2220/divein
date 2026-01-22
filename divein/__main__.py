@@ -13,6 +13,7 @@ app = typer.Typer(
 )
 
 app.command(name="list", help="List all saved hosts")(list.list_hosts)
+app.command(name="show", help="Show host details")(show.show_hosts)
 app.command(name="add", help="Add a new host")(add.add_host)
 app.command(name="delete", help="Delete a host")(delete.delete_host)
 app.command(name="rm", help="Alias for delete")(delete.delete_host)
@@ -23,7 +24,6 @@ def connect_trigger(identifier: str):
 @app.callback(invoke_without_command=True)
 def cli_root(
     ctx: typer.Context,
-    identifier: str = typer.Argument(None, help="Host ID or Nickname to connect to"),
     version: bool = typer.Option(False, "--version", "-v", help="Show the version and exit", is_eager=True)
 ):
     """
@@ -33,7 +33,7 @@ def cli_root(
     """
     # If version flag is set, print version and exit
     if version:
-        print("divein 1.0.2")
+        print("divein 1.0.5")
         return
 
     # If no subcommand and no injected connect, show help
