@@ -9,11 +9,12 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="divein",
     version="1.0.1",
-    author="Your Name",
-    author_email="your.email@example.com",
-    description="A simple SSH connection manager",
+    author="Akhilesh S",
+    author_email="akhileshs2220@gmail.com",
+    description="A simple, secure, and modern SSH connection manager",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    url="https://github.com/Akhilesh2220/divein",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
