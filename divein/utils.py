@@ -111,14 +111,15 @@ def connect_host(identifier):
                 r"(?i)continue connecting \(yes/no\)?",
                 pexpect.EOF,
                 pexpect.TIMEOUT
-            ], timeout=10)
+                pexpect.TIMEOUT
+            ], timeout=30)
             
             if index == 1:
                 # Fingerprint confirmation
                 print("[yellow]New host fingerprint detected. Accepting...[/yellow]")
                 child.sendline("yes")
                 # Wait for password prompt again
-                index = child.expect([r"(?i)password:", pexpect.EOF, pexpect.TIMEOUT], timeout=10)
+                index = child.expect([r"(?i)password:", pexpect.EOF, pexpect.TIMEOUT], timeout=30)
                 
             if index == 0:
                 # Password prompt detected
@@ -130,6 +131,7 @@ def connect_host(identifier):
                 return False
             elif index == 3:
                 print("[red]Connection timed out waiting for prompt.[/red]")
+                print(f"[dim]Last output was: {child.before}[/dim]")
                 return False
 
             # If we successfully sent the password (or didn't need to?), hand over control
