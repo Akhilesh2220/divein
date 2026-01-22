@@ -77,6 +77,8 @@ def connect_host(identifier):
          print("[red]Using insecure plaintext password[/red]")
 
     
+    ssh_command.extend(["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"])
+    
     # Add port
     ssh_command.extend(["-p", str(port)])
     
@@ -84,8 +86,6 @@ def connect_host(identifier):
     ssh_command.append(f"{username}@{host}")
     
     nickname = host_data.get("nickname", "")
-    display_name = f"{nickname}: {username}@{host}" if nickname else f"{username}@{host}"
-    
     display_name = f"{nickname}: {username}@{host}" if nickname else f"{username}@{host}"
     
     print(f"Connecting to [bold cyan]{display_name}[/bold cyan] (ID: {host_id}, Auth: {auth_type})...")
@@ -104,13 +104,12 @@ def connect_host(identifier):
             # pexpect.spawn(command, args)
             child = pexpect.spawn("ssh", ssh_command[1:], encoding='utf-8')
             
-            # Expect either a password prompt OR a fingerprint confirmation
+            # Expect either a password prompt OR a fingerprint confirmation (though strict check no should prevent it)
             # We look for common patterns.
             index = child.expect([
                 r"(?i)password:", 
                 r"(?i)continue connecting \(yes/no\)?",
                 pexpect.EOF,
-                pexpect.TIMEOUT
                 pexpect.TIMEOUT
             ], timeout=30)
             
