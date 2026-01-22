@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="divein",
-    version="1.0.0",
+    version="1.0.1",
     author="Your Name",
     author_email="your.email@example.com",
     description="A simple SSH connection manager",
@@ -28,6 +28,12 @@ setup(
         "Programming Language :: Python :: 3.10",
     ],
     python_requires=">=3.6",
+    install_requires=[
+        "typer",
+        "rich",
+        "cryptography",
+        "pexpect",
+    ],
     entry_points={
         "console_scripts": [
             "divein=divein.__main__:main",

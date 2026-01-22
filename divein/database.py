@@ -24,7 +24,7 @@ def load_database():
                 # Convert keys to integers for proper sorting
                 return {int(k): v for k, v in data.items()}
         except Exception as e:
-            print(f"❌ Error loading database: {e}")
+            print(f"Error loading database: {e}")
             return {}
     return {}
 
@@ -36,7 +36,7 @@ def save_database(data):
             json.dump(data, f, indent=2)
         return True
     except Exception as e:
-        print(f"❌ Error saving database: {e}")
+        print(f"Error saving database: {e}")
         return False
 
 def get_next_id(database):

@@ -1,34 +1,49 @@
 """
 Add command - Add new SSH hosts
 """
+import typer
+from rich import print
 from ..database import load_database, save_database, get_next_id
+from ..crypto import encrypt_password
 
 def add_host():
     """Add a new host interactively"""
-    print("\n🚀 Add New SSH Host")
+    print("\n[bold green]Add New SSH Host[/bold green]")
     print("=" * 40)
     
     # Get host details
-    nickname = input("Nickname (optional): ").strip()
-    username = input("Username: ").strip()
-    host = input("Host/IP: ").strip()
+    nickname = typer.prompt("Nickname", default="", show_default=False)
+    username = typer.prompt("Username")
+    host = typer.prompt("Host/IP")
     
     # SSH Key or Password (mutually exclusive)
-    ssh_key = input("SSH Key path (optional, press Enter for password auth): ").strip()
+    ssh_key = typer.prompt("SSH Key path (optional, press Enter for password auth)", default="", show_default=False)
+    
+    password = ""
+    encrypted_data = None
+    encryption_salt = None
     
     if ssh_key:
         # Using SSH key - no password needed
-        password = ""
-        print("🔑 Using SSH key authentication")
+        print("[yellow]Using SSH key authentication[/yellow]")
     else:
         # Using password authentication
-        password = input("Password: ").strip()
+        password = typer.prompt("Password", hide_input=True)
+        
+        # Always Ask for Master Password to encrypt
+        if password:
+             print("[yellow]Encrypting password...[/yellow]")
+             master_password = typer.prompt("Enter Master Password for encryption", hide_input=True)
+             # Encrypt
+             crypto_result = encrypt_password(password, master_password)
+             encrypted_data = crypto_result["encrypted_data"]
+             encryption_salt = crypto_result["salt"]
+             password = "" # Clear plaintext
+             print("[bold green]Password encrypted![/bold green]")
     
     # Optional fields with defaults
-    port_input = input("Port (default 22): ").strip()
-    port = int(port_input) if port_input.isdigit() else 22
-    
-    handshake = input("Handshake method (optional): ").strip()
+    port = typer.prompt("Port", default=22, type=int)
+    handshake = typer.prompt("Handshake method", default="", show_default=False)
     
     # Load existing database
     database = load_database()
@@ -42,6 +57,8 @@ def add_host():
         "username": username,
         "host": host,
         "password": password,
+        "encrypted_password": encrypted_data,
+        "encryption_salt": encryption_salt,
         "port": port,
         "ssh_key": ssh_key,
         "handshake": handshake
@@ -52,9 +69,9 @@ def add_host():
     
     if save_database(database):
         display_name = f"{nickname}: {username}@{host}" if nickname else f"{username}@{host}"
-        auth_type = "SSH Key" if ssh_key else "Password"
-        print(f"✅ Host '{display_name}' added successfully! (ID: {host_id}, Auth: {auth_type})")
+        auth_type = "SSH Key" if ssh_key else ("Encrypted Password" if encrypted_data else "Password")
+        print(f"[bold green]Host '{display_name}' added successfully![/bold green] (ID: {host_id}, Auth: {auth_type})")
         return True
     else:
-        print("❌ Failed to save host!")
+        print("[bold red]Failed to save host![/bold red]")
         return False

@@ -1,61 +1,60 @@
 """
 Main CLI entry point
 """
-import sys
-from .commands.add import add_host
-from .commands.delete import delete_host
-from .commands.list import list_hosts
-from .commands.show import show_hosts  # ← Add this import
+import typer
+from .commands import list, add, delete, show
 from .utils import connect_host
 
-def show_help():
-    """Show help message"""
-    print("""
-DiveIn - SSH Connection Manager
+app = typer.Typer(
+    name="divein",
+    help="DiveIn - SSH Connection Manager",
+    add_completion=False,
+    no_args_is_help=False
+)
 
-Usage:
-  divein add                    - Add a new host interactively
-  divein delete <identifier>    - Delete a host by ID or nickname
-  divein <identifier>           - Connect to a host directly
-  divein list                   - List all saved hosts (brief)
-  divein show                   - Show detailed host information
-  divein help                   - Show this help message
+app.command(name="list", help="List all saved hosts")(list.list_hosts)
+app.command(name="add", help="Add a new host")(add.add_host)
+app.command(name="delete", help="Delete a host")(delete.delete_host)
+app.command(name="rm", help="Alias for delete")(delete.delete_host)
+@app.command(name="connect", help="Connect to a host", hidden=True)
+def connect_trigger(identifier: str):
+    connect_host(identifier)
 
-Examples:
-  divein add                    # Add new host
-  divein delete 1              # Delete host by ID
-  divein delete myserver       # Delete host by nickname
-  divein 1                     # Connect to host by ID
-  divein myserver              # Connect to host by nickname
-  divein user@192.168.1.1      # Connect by connection string
-  divein list                  # Show brief host list
-  divein show                  # Show detailed host information
-    """)
+@app.callback(invoke_without_command=True)
+def cli_root(
+    ctx: typer.Context,
+    identifier: str = typer.Argument(None, help="Host ID or Nickname to connect to"),
+    version: bool = typer.Option(False, "--version", "-v", help="Show the version and exit", is_eager=True)
+):
+    """
+    DiveIn - Simple SSH Connection Manager.
+    
+    run 'divein <id>' or 'divein <nickname>' to connect.
+    """
+    # If version flag is set, print version and exit
+    if version:
+        print("divein 1.0.1")
+        return
+
+    # If no subcommand and no injected connect, show help
+    if ctx.invoked_subcommand is None:
+        print(ctx.get_help())
 
 def main():
-    """Main CLI entry point"""
-    if len(sys.argv) < 2:
-        show_help()
-        return
+    """Entry point for console_scripts"""
+    import sys
     
-    command = sys.argv[1]
-    
-    if command == "add":
-        add_host()
-    elif command == "delete":
-        if len(sys.argv) < 3:
-            print("❌ Usage: divein delete <ID or nickname>")
-        else:
-            delete_host(sys.argv[2])
-    elif command == "list":
-        list_hosts()
-    elif command == "show":  # ← Add this condition
-        show_hosts()
-    elif command == "help":
-        show_help()
-    else:
-        # Assume it's a connect command
-        connect_host(command)
+    # Support `divein <id>` shortcut via sys.argv patching
+    # If the first argument is not a known command, assume it's a host identifier for 'connect'
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
+        known_commands = ["add", "list", "delete", "rm", "show", "connect", "help", "--help", "-h", "--install-completion", "--show-completion"]
+        
+        # If it's not a flag and not a known command, treat it as `connect <arg>`
+        if not cmd.startswith("-") and cmd not in known_commands:
+            sys.argv.insert(1, "connect")
+            
+    app()
 
 if __name__ == "__main__":
     main()

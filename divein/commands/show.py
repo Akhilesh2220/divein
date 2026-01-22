@@ -1,68 +1,61 @@
 """
 Show command - Display detailed host information
 """
+from rich import print
+from rich.panel import Panel
+from rich.text import Text
+from rich.console import Group
 from ..database import load_database, get_database_path
 
 def show_hosts():
     """Show detailed information about all hosts"""
     database = load_database()
     
-    print(f"📁 Database: {get_database_path()}")
-    print("=" * 60)
+    print(f"[dim]Database: {get_database_path()}[/dim]")
     
     if not database:
-        print("📭 No hosts saved yet.")
+        print("[yellow]No hosts saved yet.[/yellow]")
         print("Use 'divein add' to add your first host.")
         return
-    
-    print("\n🔍 Detailed Host Information")
-    print("=" * 60)
     
     # Sort by ID
     for host_id in sorted(database.keys()):
         data = database[host_id]
-        show_host_details(host_id, data)
-        print("-" * 60)
-
-def show_host_details(host_id, data):
-    """Display detailed information for a single host"""
-    nickname = data.get("nickname", "")
-    username = data["username"]
-    host = data["host"]
-    password = data["password"]
-    port = data["port"]
-    ssh_key = data.get("ssh_key", "")
-    handshake = data.get("handshake", "")
-    
-    # Display header
-    if nickname:
-        print(f"🆔 ID: {host_id} | {nickname}")
-        print(f"🔗 Connection: {username}@{host}:{port}")
-    else:
-        print(f"🆔 ID: {host_id} | {username}@{host}:{port}")
-    
-    # Authentication details
-    if ssh_key:
-        print(f"🔑 Authentication: SSH Key")
-        print(f"   Key Path: {ssh_key}")
-    else:
-        print(f"🔑 Authentication: Password")
-        if password:
-            print(f"   Password: {password}")
+        
+        nickname = data.get("nickname", "")
+        username = data["username"]
+        host = data["host"]
+        port = data["port"]
+        ssh_key = data.get("ssh_key", "")
+        handshake = data.get("handshake", "")
+        password = data.get("password")
+        encrypted = data.get("encrypted_password")
+        
+        # Build Content
+        content_lines = []
+        content_lines.append(f"[bold]Connection:[/bold] {username}@{host}:{port}")
+        
+        # Auth info
+        if ssh_key:
+            auth_info = f"[yellow]SSH Key:[/yellow] {ssh_key}"
+        elif encrypted:
+            auth_info = "[green]Encrypted Password[/green] (Protected by Master Password)"
+        elif password:
+             auth_info = f"[red]Plaintext Password:[/red] {password}"
         else:
-            print(f"   Password: (not set)")
-    
-    # Additional details
-    print(f"🌐 Port: {port}")
-    
-    if handshake:
-        print(f"🤝 Handshake: {handshake}")
-    else:
-        print(f"🤝 Handshake: (default)")
-    
-    # Connection commands
-    print(f"💻 Connect using:")
-    print(f"   divein {host_id}")
-    if nickname:
-        print(f"   divein {nickname}")
-    print(f"   divein {username}@{host}")
+             auth_info = "[dim]None[/dim]"
+        content_lines.append(f"[bold]Authentication:[/bold] {auth_info}")
+        
+        if handshake:
+             content_lines.append(f"[bold]Handshake:[/bold] {handshake}")
+             
+        content_lines.append(f"\n[dim]Connect with:[/dim] [cyan]divein {host_id}[/cyan]")
+
+        
+        panel = Panel(
+            "\n".join(content_lines),
+            title=f"[bold white]ID: {host_id}[/bold white] {f'({nickname})' if nickname else ''}",
+            border_style="blue",
+            expand=False
+        )
+        print(panel)
