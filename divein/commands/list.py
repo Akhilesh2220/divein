@@ -7,6 +7,7 @@ from rich.table import Table
 from ..database import load_database
 from ..utils import connect_host
 from .delete import delete_host
+from .update import update_host
 
 def print_table():
     """Helper to print the hosts table"""
@@ -48,7 +49,7 @@ def list_hosts():
         if not has_hosts:
             break
             
-        sys.stdout.write("\nConnect (ID/Nickname), Delete ('rm <ID>'), or 'q' to exit: ")
+        sys.stdout.write("\nConnect (ID/Nickname), Delete ('rm <ID>'), Update ('u'), or 'q' to exit: ")
         sys.stdout.flush()
         
         cmd_buffer = []
@@ -57,15 +58,25 @@ def list_hosts():
         while True:
             char = click.getchar()
             
+            # Hotkey: 'u' for update
+            if (char == 'u' or char == 'U') and not cmd_buffer:
+                print("\n")
+                target = typer.prompt("Enter Host ID or Nickname to update")
+                if update_host(target):
+                    print("\n")
+                    # Refresh table
+                    break
+                else:
+                    # If update cancelled or failed, just loop back
+                    print("\n")
+                    break
+
             # Hotkey: 'q' to exit immediately if buffer is empty
             if (char == 'q' or char == 'Q') and not cmd_buffer:
                 print("\n")
                 should_break = True
                 break
                 
-            # Hotkeys for digits? No, strictly requested 'q'. 
-            # Numbers like '1' require enter because '10' exists.
-            
             # Handle Enter
             if char == '\r' or char == '\n':
                 print("\n")
@@ -85,7 +96,11 @@ def list_hosts():
         
         if should_break:
             break
-            
+        
+        # If we broke out of inner loop due to update (buffer empty but action taken), continue outer loop
+        if not cmd_buffer:
+             continue
+             
         choice = "".join(cmd_buffer).strip()
         
         if not choice:

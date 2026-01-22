@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="divein",
-    version="1.0.5",
+    version="1.0.6",
     author="Akhilesh S",
     author_email="akhileshs222000@gmail.com",
     description="A simple, secure, and modern SSH connection manager",

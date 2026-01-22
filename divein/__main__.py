@@ -2,7 +2,7 @@
 Main CLI entry point
 """
 import typer
-from .commands import list, add, delete, show
+from .commands import list, add, delete, show, update
 from .utils import connect_host
 
 app = typer.Typer(
@@ -15,6 +15,7 @@ app = typer.Typer(
 app.command(name="list", help="List all saved hosts")(list.list_hosts)
 app.command(name="show", help="Show host details")(show.show_hosts)
 app.command(name="add", help="Add a new host")(add.add_host)
+app.command(name="update", help="Update an existing host")(update.update_host)
 app.command(name="delete", help="Delete a host")(delete.delete_host)
 app.command(name="rm", help="Alias for delete")(delete.delete_host)
 @app.command(name="connect", help="Connect to a host", hidden=True)
@@ -33,7 +34,7 @@ def cli_root(
     """
     # If version flag is set, print version and exit
     if version:
-        print("divein 1.0.5")
+        print("divein 1.0.6")
         return
 
     # If no subcommand and no injected connect, show help
