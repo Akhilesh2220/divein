@@ -63,7 +63,7 @@ def connect_host(identifier):
         auth_type = "Encrypted Password"
         # Decrypt password
         try:
-             print(f"[yellow]This host is encrypted.[/yellow]")
+             # print(f"[yellow]This host is encrypted.[/yellow]")
              master_password = typer.prompt("Enter Master Password", hide_input=True)
              password = decrypt_password(encrypted_password, encryption_salt, master_password)
              print("[green]Decrypted successfully![/green]")
@@ -74,7 +74,7 @@ def connect_host(identifier):
     elif password:
          auth_type = "Plain Password"
          # Warn user
-         print("[red]Using insecure plaintext password[/red]")
+         # print("[red]Using insecure plaintext password[/red]")
 
     
     ssh_command.extend(["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"])
@@ -88,7 +88,7 @@ def connect_host(identifier):
     nickname = host_data.get("nickname", "")
     display_name = f"{nickname}: {username}@{host}" if nickname else f"{username}@{host}"
     
-    print(f"Connecting to [bold cyan]{display_name}[/bold cyan] (ID: {host_id}, Auth: {auth_type})...")
+    # print(f"Connecting to [bold cyan]{display_name}[/bold cyan] (ID: {host_id}, Auth: {auth_type})...")
 
     # If we have a password (either plain or decrypted), we use pexpect to automate the login.
     if (password) and not ssh_key:
@@ -115,14 +115,14 @@ def connect_host(identifier):
             
             if index == 1:
                 # Fingerprint confirmation
-                print("[yellow]New host fingerprint detected. Accepting...[/yellow]")
+                # print("[yellow]New host fingerprint detected. Accepting...[/yellow]")
                 child.sendline("yes")
                 # Wait for password prompt again
                 index = child.expect([r"(?i)password:", pexpect.EOF, pexpect.TIMEOUT], timeout=30)
                 
             if index == 0:
                 # Password prompt detected
-                print("[dim]Sending password...[/dim]")
+                # print("[dim]Sending password...[/dim]")
                 child.sendline(password)
             elif index == 2:
                 print("[red]Connection closed unexpectedly.[/red]")
