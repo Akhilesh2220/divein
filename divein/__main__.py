@@ -33,7 +33,7 @@ def cli_root(
     """
     # If version flag is set, print version and exit
     if version:
-        print("divein 1.0.1")
+        print("divein 1.0.2")
         return
 
     # If no subcommand and no injected connect, show help
