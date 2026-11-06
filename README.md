@@ -15,7 +15,7 @@ DiveIn is a secure, modern, and user-friendly CLI tool for managing and connecti
 Clone the repository and install it locally:
 
 ```bash
-git clone https://github.com/yourusername/divein.git
+git clone https://github.com/Akhilesh2220/divein.git
 cd divein
 pip install -e .
 ```
